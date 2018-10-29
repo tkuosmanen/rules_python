@@ -13,6 +13,7 @@ backports.functools-lru-cache==1.5
 backports.ssl-match-hostname==3.5.0.1
 # Test support for referencing wheels via fixed URLs
 #https://files.pythonhosted.org/packages/37/ff/97d4542f805ae25bf4b65b6263515584c78bd9a6111ed78ea971eff2946a/tensorflow-1.9.0-cp27-cp27mu-manylinux1_x86_64.whl
+tensorflow==1.11.0
 # Need to freeze to an older numpy for some reason, otherwise we get these from various modules:
 #   RuntimeWarning: numpy.dtype size changed, may indicate binary incompatibility. Expected 96, got 88
 numpy==1.14.0

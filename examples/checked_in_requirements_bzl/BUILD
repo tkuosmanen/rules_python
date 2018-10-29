@@ -24,13 +24,14 @@ py_test(
     deps = [
         requirement("pip"),
         requirement("google-cloud:dirty"),
-        requirement("scikit-learn"),
+        #requirement("scikit-learn"),
         #requirement("pycuda"),
         #requirement("botocore"),
-        requirement("pytest-mock"),
+        #requirement("pytest-mock"),
         requirement("keras"),
         #requirement("tensorflow"),
     ],
+    args = ["--hello"],
 )
 
 alias(

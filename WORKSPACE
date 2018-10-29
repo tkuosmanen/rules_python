@@ -40,7 +40,7 @@ skydoc_repositories()
 load("//:python/def.bzl", "python_toolchain_repository")
 python_toolchain_repository(
     name = "python2",
-    path = "/usr/bin/python2",
+    interpreter_path = "/usr/bin/python2",
 )
 
 # Requirements for building our piptool.

@@ -218,6 +218,7 @@ py_binary(
     f.write("""
 package(default_visibility = ["//visibility:public"])
 
+load("@io_bazel_rules_python//python:python.bzl", "py_library")
 load("@{repository}//:requirements.bzl", "requirement")
 
 filegroup(

@@ -27,3 +27,5 @@ py_library(
     srcs = [":sitecustomize.py"],
     imports = ["."],
 )
+
+toolchain_type(name = "toolchain")
