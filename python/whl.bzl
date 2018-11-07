@@ -182,7 +182,11 @@ download_or_build_wheel = repository_rule(
         ),
     },
     implementation = _download_or_build_wheel_impl,
-    environ = ["BAZEL_WHEEL_CACHE"],
+    environ = [
+        "BAZEL_WHEEL_CACHE",
+        "BAZEL_WHEEL_REMOTE_RETRY_ATTEMPTS",
+        "BAZEL_WHEEL_LOCAL_FALLBACK",
+    ],
 )
 
 

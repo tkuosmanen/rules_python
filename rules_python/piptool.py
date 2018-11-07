@@ -23,6 +23,8 @@ import pkgutil
 import pkg_resources
 import re
 import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 import shutil
 import sys
 import tempfile
@@ -131,13 +133,44 @@ def get_cache_url(args):
     return None
   return "http://{}/{}".format(cache_base, args.cache_key)
 
+def get_remote_retry_attempts():
+  env_value = os.environ.get("BAZEL_WHEEL_REMOTE_RETRY_ATTEMPTS")
+  if not env_value or env_value == '0':
+    return 0
+  else:
+    return int(env_value)
+
+def local_fallback_enabled():
+  env_value = os.environ.get("BAZEL_WHEEL_LOCAL_FALLBACK")
+  if env_value and env_value == '1':
+    return True
+  else:
+    return False
+
+def requests_with_retry(retries):
+  session = requests.Session()
+  # Retry on server and gateway errors as they may be intermittent.
+  # Retry intervals are [0.0, 0.2, 0.4, 0.8, ...] seconds.
+  retry = Retry(total=retries, backoff_factor=0.1, status_forcelist=(500, 502, 503, 504))
+  adapter = HTTPAdapter(max_retries=retry)
+  session.mount('http://', adapter)
+  session.mount('https://', adapter)
+  return session
+
 def build(args):
   cache_url = get_cache_url(args)
   if cache_url:
-    r = requests.get(cache_url)
-    # 404 (not found) means cache miss
-    # 502 (bad gateway) usually means the proxy dropped the request (e.g. no access to cache)
-    if r.status_code in [404, 502]:
+    try:
+      max_retry_attempts = get_remote_retry_attempts()
+      r = requests_with_retry(max_retry_attempts).get(cache_url)
+      use_local_fallback = False
+    # If cache server refuses connection or retries are exhausted, an exception is raised.
+    except (requests.exceptions.ConnectionError, requests.exceptions.RetryError):
+      use_local_fallback = True
+      if not local_fallback_enabled():
+        raise
+    # Build locally when remote local fallback is enabled or on 404 (not found = cache miss).
+    if use_local_fallback or r.status_code == 404:
       build_wheel(args)
     else:
       r.raise_for_status()
